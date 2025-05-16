@@ -41,6 +41,18 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findOne({Cin: userId});
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }   
+});
 
 const generationToken = (user) => {
     return jwt.sign({ user }, process.env.TOKEN, { expiresIn: '1h' });
@@ -66,7 +78,7 @@ router.post('/login', async (req, res) => {
 
 router.put('/update/:Cin', async (req, res) => {
     const { Cin } = req.params;
-    let { Nom, Prenom, Email, Password, Image } = req.body; // Use 'let' for Password and Image
+    let { Nom, Prenom, Email, Password, Image } = req.body;
     try {
         const user = await User.findOne({ Cin });
         if (!user) {
@@ -74,11 +86,11 @@ router.put('/update/:Cin', async (req, res) => {
         }
         if (Password) {
             const salt = await bcrypt.genSalt(10);
-            Password = await bcrypt.hash(Password, salt); // Reassign hashed password
+            Password = await bcrypt.hash(Password, salt);
         }
         if (Image) {
             const result = await cloudinary.uploader.upload(Image);
-            Image = result.secure_url; // Reassign the secure URL
+            Image = result.secure_url; 
         }
         user.Nom = Nom || user.Nom;
         user.Prenom = Prenom || user.Prenom;

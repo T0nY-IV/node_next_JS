@@ -4,7 +4,10 @@ const AnnounceSchema = new mongoose.Schema({
     nbPlaceVal: { type: Number, required: true },
     bagage: { type: Boolean, required: true },
     prix: { type: Number, required: true },
+    depart: { type: String, required: true },
+    destination: { type: String, required: true },
     dateDebut: { type: Date, required: true },
+    dateCreation: { type: Date, default: Date.now },
     Remarque: { type: String, required: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });

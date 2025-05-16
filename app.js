@@ -22,3 +22,5 @@ console.log(`server is running on port ${process.env.PORT}`)
 module.exports = app;
 const userRoute = require("./routes/user.route");
 app.use("/api/user", userRoute);
+const announceRoute = require("./routes/Announce.route");
+app.use("/api/announce", announceRoute);
