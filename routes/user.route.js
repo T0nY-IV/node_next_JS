@@ -68,6 +68,7 @@ router.post('/login', async (req, res) => {
         if (!User) {
             return res.status(400).json({ message: "User not found" });
         } else if (await bcrypt.compare(Password, user.Password)) {
+            sessionStorage.setItem('user', JSON.stringify(User));
             const token = generationToken(User);
             res.status(200).json({ success: true, token, User });
         }
