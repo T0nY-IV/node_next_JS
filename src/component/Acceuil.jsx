@@ -47,75 +47,7 @@ export default function Acceuil() {
             Ajouter un poste
           </a>
         </div>
-
-        {/* Section de recherche superposée */}
-        <div style={{
-          position: 'absolute',
-          bottom: '-50px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '80%',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          padding: '20px',
-          ...cursiveStyle
-        }}>
-          <div className="d-flex justify-content-between align-items-end gap-3">
-            {/* Filtre Poste */}
-            <div style={{ flex: 1 }}>
-              <label className="fw-bold mb-2" style={cursiveStyle}>Type de poste</label>
-              <select 
-                className="form-select"
-                style={cursiveStyle}
-              >
-                <option>Recherche</option>
-                <option>Offre</option>
-              </select>
-            </div>
-
-            {/* Filtre Départ */}
-            <div style={{ flex: 1 }}>
-              <label className="fw-bold mb-2" style={cursiveStyle}>Départ</label>
-              <select 
-                className="form-select"
-                style={cursiveStyle}
-              >
-                <option>Casablanca</option>
-                <option>Rabat</option>
-                <option>Marrakech</option>
-              </select>
-            </div>
-
-            {/* Filtre Arrivée */}
-            <div style={{ flex: 1 }}>
-              <label className="fw-bold mb-2" style={cursiveStyle}>Arrivée</label>
-              <select 
-                className="form-select"
-                style={cursiveStyle}
-              >
-                <option>Tanger</option>
-                <option>Fès</option>
-                <option>Agadir</option>
-              </select>
-            </div>
-
-            {/* Bouton Recherche */}
-            <div>
-              <button 
-                className="btn btn-dark py-2 px-4 fw-bold" 
-                style={{ 
-                  height: '42px',
-                  ...cursiveStyle
-                }}
-              >
-                Rechercher
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
-
       {/* Espace pour le contenu suivant */}
       <div style={{ height: '50px' }}></div>
     </div>

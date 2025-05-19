@@ -1,20 +1,34 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, Button, Form, Image, Row, Col, Modal } from 'react-bootstrap';
 
 const UserCard = () => {
   // État initial
   const [user, setUser] = useState({
-    nom: 'Dupont',
-    prenom: 'Jean',
-    cin: 'AB123456',
-    email: 'jean.dupont@example.com',
-    image: '1.jpg' // Chemin par défaut ou URL
+    Nom: '',
+    Prenom: '',
+    Cin: '',
+    Email: '',
+    Image: '/default-avatar.png' // Image par défaut depuis le dossier public
   });
 
   const [editMode, setEditMode] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser({
+        Nom: parsedUser.Nom || '',
+        Prenom: parsedUser.Prenom || '',
+        Cin: parsedUser.Cin || '',
+        Email: parsedUser.Email || '',
+        Image: parsedUser.Image || '/default-avatar.png'
+      });
+    }
+  }, []);
 
   // Gestionnaire de changement pour les champs texte
   const handleChange = (e) => {
@@ -38,7 +52,7 @@ const UserCard = () => {
   // Confirmer le changement d'image
   const confirmImageChange = () => {
     if (previewImage) {
-      setUser(prev => ({ ...prev, image: previewImage }));
+      setUser(prev => ({ ...prev, Image: previewImage }));
     }
     setShowImageModal(false);
   };
@@ -52,17 +66,59 @@ const UserCard = () => {
     }
   };
 
+  // Sauvegarder les modifications
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Vous devez être connecté pour modifier votre profil');
+        return;
+      }
+
+      // Préparer les données à envoyer
+      const userData = {
+        ...user,
+        // Ne pas envoyer l'image si c'est l'image par défaut
+        Image: user.Image === '/default-avatar.png' ? null : user.Image
+      };
+
+      const response = await fetch('http://localhost:3001/api/user/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Mettre à jour le localStorage avec les nouvelles données
+        localStorage.setItem('user', JSON.stringify(data));
+        setUser(data);
+        setEditMode(false);
+        alert('Profil mis à jour avec succès !');
+      } else {
+        throw new Error(data.message || 'Erreur lors de la mise à jour du profil');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert(error.message || 'Erreur lors de la mise à jour du profil');
+    }
+  };
+
   // Basculer entre mode édition et visualisation
   const toggleEdit = () => {
     if (editMode) {
-      // Ici vous pourriez ajouter une logique pour sauvegarder les modifications
-      console.log('Données sauvegardées:', user);
+      handleSave();
+    } else {
+      setEditMode(true);
     }
-    setEditMode(!editMode);
   };
 
   return (
-    <div className="d-flex justify-content-center mt-5">
+    <div className="d-flex justify-content-center ">
       <Card style={{ width: '700px', borderRadius: '15px',padding: '20px' }} className="shadow-lg">
         <Card.Body>
           <Row>
@@ -70,7 +126,7 @@ const UserCard = () => {
             <Col md={4} className="d-flex flex-column align-items-center">
               <div className="position-relative">
                 <Image 
-                  src={user.image} 
+                  src={user.Image || '/default-avatar.png'} 
                   roundedCircle 
                   width={150}
                   height={150}
@@ -130,8 +186,8 @@ const UserCard = () => {
                     <Form.Label>Nom</Form.Label>
                     <Form.Control
                       type="text"
-                      name="nom"
-                      value={user.nom}
+                      name="Nom"
+                      value={user.Nom}
                       onChange={handleChange}
                       placeholder="Entrez votre nom"
                     />
@@ -141,8 +197,8 @@ const UserCard = () => {
                     <Form.Label>Prénom</Form.Label>
                     <Form.Control
                       type="text"
-                      name="prenom"
-                      value={user.prenom}
+                      name="Prenom"
+                      value={user.Prenom}
                       onChange={handleChange}
                       placeholder="Entrez votre prénom"
                     />
@@ -152,10 +208,11 @@ const UserCard = () => {
                     <Form.Label>CIN</Form.Label>
                     <Form.Control
                       type="text"
-                      name="cin"
-                      value={user.cin}
+                      name="Cin"
+                      value={user.Cin}
                       onChange={handleChange}
                       placeholder="Entrez votre CIN"
+                      disabled
                     />
                   </Form.Group>
 
@@ -163,8 +220,8 @@ const UserCard = () => {
                     <Form.Label>Email</Form.Label>
                     <Form.Control
                       type="email"
-                      name="email"
-                      value={user.email}
+                      name="Email"
+                      value={user.Email}
                       onChange={handleChange}
                       placeholder="Entrez votre email"
                     />
@@ -173,12 +230,11 @@ const UserCard = () => {
               ) : (
                 // Mode visualisation
                 <div>
-                  
                   <div className="mb-3">
-                    <p className="mb-1"><strong className="text-secondary">Nom:</strong> <span className="fs-5">{user.nom}</span></p>
-                    <p className="mb-1"><strong className="text-secondary">Prénom:</strong> <span className="fs-5">{user.prenom}</span></p>
-                    <p className="mb-1"><strong className="text-secondary">CIN:</strong> <span className="fs-5">{user.cin}</span></p>
-                    <p className="mb-1"><strong className="text-secondary">Email:</strong> <span className="fs-5">{user.email}</span></p>
+                    <p className="mb-1"><strong className="text-secondary">Nom:</strong> <span className="fs-5">{user.Nom}</span></p>
+                    <p className="mb-1"><strong className="text-secondary">Prénom:</strong> <span className="fs-5">{user.Prenom}</span></p>
+                    <p className="mb-1"><strong className="text-secondary">CIN:</strong> <span className="fs-5">{user.Cin}</span></p>
+                    <p className="mb-1"><strong className="text-secondary">Email:</strong> <span className="fs-5">{user.Email}</span></p>
                   </div>
                 </div>
               )}
@@ -198,10 +254,9 @@ const UserCard = () => {
             roundedCircle 
             width={200}
             height={200}
-            className="mb-3 border object-fit-cover"
-            alt="Nouvelle photo de profil"
+            className="mb-3"
+            alt="Prévisualisation"
           />
-          <p>Voulez-vous utiliser cette photo comme nouvelle image de profil ?</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelImageChange}>

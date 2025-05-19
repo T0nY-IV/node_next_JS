@@ -9,9 +9,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
+    Cin: '',
     Nom: '',
     Prenom: '',
-    Cin: '',
     Email: '',
     Password: '',
     Role: 'user',
@@ -39,19 +39,40 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
-    for (const key in form) {
-      data.append(key, form[key]);
-    }
-
+    
     try {
-      const res = await fetch('http://localhost:5000/api/signup', {
+      // First, upload the image if it exists
+      let imageUrl = null;
+      if (form.Image) {
+        const imageData = new FormData();
+        imageData.append('file', form.Image);
+        imageData.append('upload_preset', 'your_upload_preset'); // Replace with your Cloudinary upload preset
+        
+        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
+          method: 'POST',
+          body: imageData
+        });
+        
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.secure_url;
+      }
+
+      // Then send the user data
+      const userData = {
+        ...form,
+        Image: imageUrl
+      };
+
+      const res = await fetch('http://localhost:3001/api/user/', {
         method: 'POST',
-        body: data,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
       });
+
       const result = await res.json();
       if (res.ok) {
         alert('Inscription réussie !');
+        window.location.href = '/login';
       } else {
         alert(result.message || 'Erreur');
       }

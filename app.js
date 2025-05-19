@@ -3,24 +3,42 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
+// Load environment variables
+dotenv.config();
 
 const app = express();
-app.use(cors({
-    origin: '*',
-}))
+
+// Middleware
+app.use(cors());
 
 app.use(express.json());
-dotenv.config();
-mongoose.connect(process.env.DATABASE).then(() => {
-    console.log("connected successfully to the database")
-}).catch((err) => {
-    console.log("error connecting to the database", err)
+
+// Routes
+const userRoute = require("./routes/user.route");
+const announceRoute = require("./routes/Announce.route");
+
+app.use("/api/user", userRoute);
+app.use("/api/announce", announceRoute);
+
+// Database connection
+mongoose.connect(process.env.DATABASE)
+    .then(() => {
+        console.log("Connected successfully to the database");
+        // Start server only after database connection
+        const PORT = process.env.PORT || 3001;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Error connecting to the database:", err);
+        process.exit(1);
+    });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
-app.listen(process.env.PORT)
-console.log(`server is running on port ${process.env.PORT}`)
 module.exports = app;
-const userRoute = require("./routes/user.route");
-app.use("/api/user", userRoute);
-const announceRoute = require("./routes/Announce.route");
-app.use("/api/announce", announceRoute);

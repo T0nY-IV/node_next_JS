@@ -25,17 +25,27 @@ export default function OffrePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (!userData) {
+      alert('❌ Vous devez être connecté pour publier une offre');
+      return;
+    }
+
     const annonceData = {
       ...form,
       nbPlaceVal: parseInt(form.nbPlaceVal),
       prix: parseFloat(form.prix),
       dateDebut: new Date(form.dateDebut),
+      userId: userData._id
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/offre', {
+      const res = await fetch('http://localhost:3001/api/announce/ajoutOffre', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify(annonceData),
       });
       

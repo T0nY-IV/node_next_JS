@@ -1,27 +1,44 @@
 'use client';
-import { Navbar, Container, Nav, Button } from 'react-bootstrap';
+import { Navbar, Container, Nav, Button, Image } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaHome, FaSignOutAlt } from 'react-icons/fa';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Menu = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
 
-  // Style global pour la police cursive
-  const cursiveStyle = {
-    fontFamily: 'cursive',
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (token && userData) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setUser(null);
+    router.push('/login');
   };
 
   const handleAuthAction = () => {
     if (isLoggedIn) {
-      // Logique de déconnexion
-      setIsLoggedIn(false);
-      // Ajoutez ici d'autres actions de déconnexion si nécessaire
+      router.push('/compte');
     } else {
-      // Redirection vers la page de login
-      window.location.href = '/compte';
+      router.push('/login');
     }
+  };
+
+  // Style global pour la police cursive
+  const cursiveStyle = {
+    fontFamily: 'cursive',
   };
 
   return (
@@ -56,15 +73,33 @@ const Menu = () => {
         <Navbar.Collapse id="main-navbar" className="justify-content-end">
           <Nav className="align-items-lg-center">
             {isLoggedIn ? (
-              <Button
-                variant="outline-light"
-                onClick={handleAuthAction}
-                className="d-flex align-items-center"
-                style={cursiveStyle}
+              <div 
+                onClick={() => router.push('/compte')}
+                style={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '5px 10px',
+                  borderRadius: '20px',
+                  transition: 'background-color 0.3s',
+                  ':hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
               >
-                <FaSignOutAlt className="me-2" />
-                Se déconnecter
-              </Button>
+                <Image 
+                  src={user?.Image || '/default-avatar.png'} 
+                  roundedCircle 
+                  width={35}
+                  height={35}
+                  style={{ objectFit: 'cover' }}
+                  alt="Photo de profil"
+                />
+                <span className="text-light">
+                  {user?.Nom} {user?.Prenom}
+                </span>
+              </div>
             ) : (
               <div 
                 onClick={handleAuthAction}

@@ -6,7 +6,7 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ Cin: '', Password: '' });
 
   // Style global pour la police cursive
   const cursiveStyle = {
@@ -21,15 +21,20 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
+      const res = await fetch('http://localhost:3001/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
 
       const data = await res.json();
-      if (res.ok) alert('Connection réussie !');
-      else alert(data.message || 'Erreur');
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.User));
+        window.location.href = '/';
+      } else {
+        alert(data.message || 'Erreur');
+      }
     } catch (err) {
       alert('Erreur serveur');
     }
@@ -58,14 +63,14 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <FloatingLabel 
-            controlId="floatingEmail" 
-            label="Email" 
+            controlId="floatingCin" 
+            label="CIN" 
             className="mb-3"
           >
             <Form.Control
-              type="email"
-              name="email"
-              value={form.email}
+              type="text"
+              name="Cin"
+              value={form.Cin}
               onChange={handleChange}
               required
               style={{ 
@@ -84,8 +89,8 @@ export default function LoginPage() {
           >
             <Form.Control
               type="password"
-              name="password"
-              value={form.password}
+              name="Password"
+              value={form.Password}
               onChange={handleChange}
               required
               style={{ 
